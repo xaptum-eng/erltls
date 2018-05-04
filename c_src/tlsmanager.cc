@@ -172,21 +172,46 @@ SSL_CTX* TlsManager::CreateContext(const ContextProperties& props)
     if(props.reuse_sessions_ttl_sec)
         SSL_CTX_set_timeout(ctx.get(), props.reuse_sessions_ttl_sec);
 
-    if(!props.certfile.empty())
+    if(!props.certfile.empty() || !props.cert.empty())
     {
-      // venkat - use SSL_CTX_use_certificate_file() to support both PEM and ASN1 fileformats
-      if(!SSL_CTX_use_certificate_file(ctx.get(), props.certfile.c_str(), SSL_FILETYPE_PEM) &&
-	 !SSL_CTX_use_certificate_file(ctx.get(), props.certfile.c_str(), SSL_FILETYPE_ASN1))
-            return NULL;
+        if(!props.certfile.empty()){ // certfile is defined
+            // venkat - use SSL_CTX_use_certificate_file() to support both PEM and ASN1 fileformats
+            if(!SSL_CTX_use_certificate_file(ctx.get(), props.certfile.c_str(), SSL_FILETYPE_PEM) &&
+	        !SSL_CTX_use_certificate_file(ctx.get(), props.certfile.c_str(), SSL_FILETYPE_ASN1))
+                return NULL;
 
-        std::string privatekey = props.keyfile.empty() ? props.certfile : props.keyfile;
+            std::string privatekey = props.keyfile.empty() ? props.certfile : props.keyfile;
 
-        if(!SSL_CTX_use_PrivateKey_file(ctx.get(), privatekey.c_str(), SSL_FILETYPE_PEM) &&
-	   !SSL_CTX_use_PrivateKey_file(ctx.get(), privatekey.c_str(), SSL_FILETYPE_ASN1))
-            return NULL;
+            if(!SSL_CTX_use_PrivateKey_file(ctx.get(), privatekey.c_str(), SSL_FILETYPE_PEM) &&
+	            !SSL_CTX_use_PrivateKey_file(ctx.get(), privatekey.c_str(), SSL_FILETYPE_ASN1))
+                return NULL;
 
-        if(!SSL_CTX_check_private_key(ctx.get()))
-            return NULL;
+            if(!SSL_CTX_check_private_key(ctx.get()))
+                return NULL;
+
+        }
+        else{  // cert and key are defined
+
+            if (props.key.empty()){
+                printf("Invalid options: cert without key!");
+                return NULL;
+            }
+
+            if(!SSL_CTX_use_certificate_ASN1(ctx.get(), props.cert.size(), (uint8_t *) props.cert.c_str())){
+                printf("Invalid cert!");
+                return NULL;
+            }
+
+            if(!SSL_CTX_use_PrivateKey_ASN1(EVP_PKEY_ED25519, ctx.get(), (uint8_t *) props.key.c_str(), props.key.size())){
+                printf("Invalid key!");
+                return NULL;
+            }
+
+           if(!SSL_CTX_check_private_key(ctx.get())){
+                printf("Failed private key check!\n");
+                return NULL;
+           }
+        }
 
         //sessing ticketing make sense only in case private key was set
 

@@ -36,7 +36,7 @@ function DownloadBoringSsl()
 
 	# Download the file
 	fail_check curl -sLO $REPO/$PKG
-	
+
 	popd
 	popd
 }
@@ -48,7 +48,7 @@ function BuildBoringSsl()
 
 	tar -zxvf $PKG
 	rm -rf $PKG
-	
+
 	popd
 	popd
 }

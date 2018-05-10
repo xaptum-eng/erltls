@@ -91,13 +91,14 @@ version() ->
     ?NOT_LOADED.
 
 chunk_send_data(TlsSock, Data) when is_binary(Data) ->
-    lager:info("chunk_send_data(~p, ~p is_binary? ~p)", [TlsSock, Data, is_binary(Data)]),
+    lager:info("chunk_send_data when binary (~p, ~p is_binary? ~p)", [TlsSock, Data, is_binary(Data)]),
     chunk_send_data(TlsSock, Data, byte_size(Data), <<>>);
 chunk_send_data(TlsSock, Data) ->
-    lager:info("chunk_send_data(~p, ~p is_binary? ~p)", [TlsSock, Data, is_binary(Data)]),
+    lager:info("chunk_send_data when not binary(~p, ~p is_binary? ~p)", [TlsSock, Data, is_binary(Data)]),
     chunk_send_data(TlsSock, iolist_to_binary(Data)).
 
 chunk_send_data(TlsSock, Data, Size, Buffer) ->
+  lager:info("chunk_send_data(~p, ~p, ~p, ~p)", [TlsSock, Data, Size, Buffer]),
     case Size > ?MAX_BYTES_TO_NIF of
         true ->
             <<Chunk:?MAX_BYTES_TO_NIF/binary, Rest/binary>> = Data,

@@ -133,6 +133,7 @@ init(#state{tcp = TcpSocket, tls_ref = TlsRef} = State) ->
     {ok, State#state{owner_monitor_ref = OwnerMonitorRef, tcp_monitor_ref = TcpMonitorRef, socket_ref = SocketRef}}.
 
 handle_call({encode_data, Data}, _From, #state{tls_ref = TlsSock} = State) ->
+    lager:info("Encoding data ~p", [Data]),
     {reply, erltls_nif:chunk_send_data(TlsSock, Data), State};
 
 handle_call({decode_data, TlsData, ExpectedLength}, _From, #state{tls_ref = TlsSock, emul_opts = EmOpt, buffer = Bf} = State) ->

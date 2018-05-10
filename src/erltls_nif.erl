@@ -91,8 +91,10 @@ version() ->
     ?NOT_LOADED.
 
 chunk_send_data(TlsSock, Data) when is_binary(Data) ->
+    lager:info("chunk_send_data(~p, ~p)", [TlsSock, Data]),
     chunk_send_data(TlsSock, Data, byte_size(Data), <<>>);
 chunk_send_data(TlsSock, Data) ->
+    lager:info("chunk_send_data(~p, ~p)", [TlsSock, Data]),
     chunk_send_data(TlsSock, iolist_to_binary(Data)).
 
 chunk_send_data(TlsSock, Data, Size, Buffer) ->

@@ -102,17 +102,23 @@ chunk_send_data(TlsSock, Data, Size, Buffer) ->
     case Size > ?MAX_BYTES_TO_NIF of
         true ->
             <<Chunk:?MAX_BYTES_TO_NIF/binary, Rest/binary>> = Data,
+            lager:info("Sending Chunk ~p to ~p", [Chunk, TlsSock]),
             case ssl_send_data(TlsSock, Chunk) of
                 {ok, ProcessedData} ->
+                  lager:info("Sending chunk successful: {ok, ~p}", [ProcessedData]),
                     chunk_send_data(TlsSock, Rest, Size - ?MAX_BYTES_TO_NIF, erltls_utils:get_buffer(Buffer, ProcessedData));
                 Error ->
+                  lager:error("Sending chunk ~p: ssl_send_data error ~p!", [Chunk, Error]),
                     Error
             end;
         _ ->
+          lager:info("Sending Data ~p to ~p", [Data, TlsSock]),
             case ssl_send_data(TlsSock, Data) of
                 {ok, ProcessedData} ->
+                  lager:info("Sending data ~p successful: {ok, ~p}", [Data, ProcessedData]),
                     {ok, erltls_utils:get_buffer(Buffer, ProcessedData)};
                 Error ->
+                  lager:error("Sending data ~p: ssl_send_data_error ~p", [Data, Error]),
                     Error
             end
     end.

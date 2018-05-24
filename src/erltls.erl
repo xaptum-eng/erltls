@@ -291,7 +291,7 @@ ssl_accept(Socket, SslOptions, Timeout) when is_port(Socket) ->
     ok | {error, reason()}.
 
 send(#tlssocket{ssl_pid = Pid, tcp_sock = TcpSocket}, Data) ->
-    lager:info("Sending data ~p", [Data]),
+    %%lager:debug("Sending data ~p", [Data]),
     case erltls_ssl_process:encode_data(Pid, Data) of
         {ok, TlsData} ->
             gen_tcp:send(TcpSocket, TlsData);

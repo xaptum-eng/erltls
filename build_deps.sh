@@ -9,7 +9,16 @@ if [ -f "$DEPS_LOCATION/$DESTINATION/lib/libssl.a" ]; then
 fi
 
 REPO=http://dl.bintray.com/xaptum-eng/tar-bundles
-PKG=boringssl-441efad.tar.gz
+
+
+DEBIAN_VERSION=$(cat /etc/debian_version)
+if [[ $DEBIAN_VERSION =~ 9\.* ]]; then
+    PKG=boringssl-441efad-stretch.tar.gz
+elif [[ $DEBIAN_VERSION =~ 8\.* ]]; then
+    PKG=boringssl-441efad-jessie.tar.gz
+else
+    PKG=boringssl-441efad-linux.tar.gz
+fi
 
 function fail_check
 {
